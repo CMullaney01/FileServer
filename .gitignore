@@ -1,0 +1,5 @@
+# .gitignore
+/TestPublicPrivateKey/certificate.crt
+/TestPublicPrivateKey/private.key
+/TestPublicPrivateKey/server.csr
+
