@@ -13,9 +13,17 @@ import (
 )
 
 func main() {
+	// Existing routes for file handling
 	http.Handle("/upload", handlers.CORSHandler(http.HandlerFunc(handlers.UploadHandler)))
 	http.Handle("/download", handlers.CORSHandler(http.HandlerFunc(handlers.DownloadHandler)))
 	http.Handle("/list", handlers.CORSHandler(http.HandlerFunc(handlers.ListFilesHandler)))
+
+	// New routes for authentication -- redirects should be handled on the client side of things
+	http.HandleFunc("/signin", handlers.Signin)
+	http.HandleFunc("/welcome", handlers.Welcome)
+	http.HandleFunc("/refresh", handlers.Refresh)
+	http.HandleFunc("/logout", handlers.Logout)
+
 
 	s := &http.Server{
 		Addr:           ":8080",

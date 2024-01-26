@@ -98,3 +98,5 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 
 	io.Copy(w, file)
 }
+
+// Sign in and Welcome Handlers
