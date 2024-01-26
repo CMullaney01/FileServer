@@ -87,17 +87,40 @@ func downloadFile(fileName string, targetURL string) error {
     return nil
 }
 
+func listFiles(targetURL string) error {
+	resp, err := http.Get(targetURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("List files failed with status: %v", resp.Status)
+	}
+
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("List of files:")
+	fmt.Println(string(content))
+	return nil
+}
+
+
 func main() {
-	uploadURL := "https://localhost:8443/upload"
-	downloadURL := "https://localhost:8443/download"
+	uploadURL := "http://localhost:8080/upload"   // Use HTTP for development
+	downloadURL := "http://localhost:8080/download" // Existing download URL
+	listURL := "http://localhost:8080/list"         // New list URL
 
 	// Upload file
-	err := uploadFile("./test1.txt", uploadURL)
-	// if err != nil {
-		// fmt.Println("Upload failed:", err)
-		// return
-	// }
-	// fmt.Println("File uploaded successfully")
+	err := uploadFile("./test2.txt", uploadURL)
+	if err != nil {
+		fmt.Println("Upload failed:", err)
+		return
+	}
+	fmt.Println("File uploaded successfully")
 
 	// Download file
 	err = downloadFile("./test.txt", downloadURL)
@@ -106,4 +129,11 @@ func main() {
 		return
 	}
 	fmt.Println("File downloaded successfully")
+
+	// List files
+	err = listFiles(listURL)
+	if err != nil {
+		fmt.Println("List files failed:", err)
+		return
+	}
 }

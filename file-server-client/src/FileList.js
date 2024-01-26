@@ -1,4 +1,3 @@
-// FileList.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -8,7 +7,11 @@ const FileList = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await axios.get("https://localhost:8443/download");
+        // Use relative URL for both HTTP and HTTPS
+        const response = await axios.get("http://localhost:8080/list");
+        console.log("Response from server:", response);
+
+        // Assuming the response is an array of file names
         setFiles(response.data);
       } catch (error) {
         console.error("Error fetching files:", error);

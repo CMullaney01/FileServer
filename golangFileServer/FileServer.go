@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +13,40 @@ import (
 	"syscall"
 	"time"
 )
+
+// CORSHandler adds CORS headers to the provided http.Handler.
+func CORSHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+
+func listFilesHandler(w http.ResponseWriter, r *http.Request) {
+	files, err := ioutil.ReadDir("./upload")
+	if err != nil {
+		http.Error(w, "Error reading directory: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var fileNames []string
+	for _, file := range files {
+		fileNames = append(fileNames, file.Name())
+	}
+	log.Printf("Files: %+v\n", fileNames)
+
+	// Convert file names to JSON and send the response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(fileNames)
+}
+
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -28,7 +64,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Uploaded file: %+v\n", header.Filename)
 
 	// Save the file
-	dst, err := os.Create("./uploads/" + header.Filename)
+	dst, err := os.Create("./upload/" + header.Filename)
 	if err != nil {
 		http.Error(w, "Error saving the file: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -49,7 +85,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	fileName := r.URL.Query().Get("filename")
 
 	// Open the file on the server
-	filePath := "./uploads/" + fileName
+	filePath := "./upload/" + fileName
 	file, err := os.Open(filePath)
 	if err != nil {
 		http.Error(w, "File not found", http.StatusNotFound)
@@ -75,38 +111,40 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/upload", uploadHandler)
-	http.HandleFunc("/download", downloadHandler)
-
+	http.Handle("/upload", CORSHandler(http.HandlerFunc(uploadHandler)))
+	http.Handle("/download", CORSHandler(http.HandlerFunc(downloadHandler)))
+	http.Handle("/list", CORSHandler(http.HandlerFunc(listFilesHandler)))
 	// Specify the paths to the TLS certificate and key files
-	// currently using test files and browsers etc will give warnings that it is not secure
-	// can use certificate from somewhere like Let's Encrypt
-	certFile := "./TestPublicPrivateKey/certificate.crt"
-	keyFile := "./TestPublicPrivateKey/private.key"
+	// For development, use a self-signed certificate. For production, replace with a valid certificate.
+	// certFile := "./TestPublicPrivateKey/certificate.crt"
+	// keyFile := "./TestPublicPrivateKey/private.key"
 
-	// create server
+	// For development, you can use HTTP
+	// For production, uncomment the TLSConfig section and use HTTPS
 	s := &http.Server{
-		Addr:           ":8443",
-		Handler:        nil, // opportunity here to use a non default multiplexer for routing to handle functions
+		Addr:           ":8080", // Use a different port for HTTP
+		Handler:        nil,      // opportunity here to use a non-default multiplexer for routing to handle functions
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
+		// TLSConfig: &tls.Config{
+		// 	InsecureSkipVerify: true, // Skip TLS verification -- only for development
+		// },
 	}
-	
-	log.Println("Starting the server on :8443 (HTTPS)")
-	
+
+	log.Println("Starting the server on :8080 (HTTP)")
+
 	// Handle graceful shutdown
-	
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := s.ListenAndServeTLS(certFile, keyFile); err != nil {
+		// if err := s.ListenAndServeTLS(certFile, keyFile); err != nil { ## http option
+		if err := s.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
 	}()
-	
-	
+
 	<-sigCh
 	log.Println("Shutting down gracefully...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
