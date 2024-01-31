@@ -1,6 +1,6 @@
 // App.js
 import React from "react";
-import FileList from "./FileList";
+import FileList from "./components/FileList";
 
 function App() {
   return (

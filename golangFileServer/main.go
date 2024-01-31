@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/CMullaney01/FileServer/handlers"
+	"github.com/CMullaney01/FileServer/middleware"
 )
 
 func main() {
