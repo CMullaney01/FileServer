@@ -1,13 +1,9 @@
 package middleware
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
+
+	"github.com/CMullaney01/FileServer/handlers"
 )
 
 // AuthCORSHandler adds CORS headers and performs authentication.
@@ -19,8 +15,23 @@ func AuthCORSHandler(h http.Handler) http.Handler {
 			return
 		}
 
-		// Your authentication logic goes here
-		if !isAuthenticated(r) {
+		// Get session token from cookie
+		c, err := r.Cookie("session_token")
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		sessionToken := c.Value
+
+		// Check if the session token is valid
+		userSession, exists := handlers.Sessions[sessionToken]  // Update this line to use the correct variable name
+		if !exists || userSession.IsExpired() {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Continue to authentication
+		if !handlers.AuthenticateUser(userSession.Username, "") {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}

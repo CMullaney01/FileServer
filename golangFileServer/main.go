@@ -15,9 +15,9 @@ import (
 
 func main() {
 	// Existing routes for file handling
-	http.Handle("/upload", handlers.CORSHandler(http.HandlerFunc(handlers.UploadHandler)))
-	http.Handle("/download", handlers.CORSHandler(http.HandlerFunc(handlers.DownloadHandler)))
-	http.Handle("/list", handlers.CORSHandler(http.HandlerFunc(handlers.ListFilesHandler)))
+	http.Handle("/upload", middleware.AuthCORSHandler(http.HandlerFunc(handlers.UploadHandler)))
+	http.Handle("/download", middleware.AuthCORSHandler(http.HandlerFunc(handlers.DownloadHandler)))
+	http.Handle("/list", middleware.AuthCORSHandler(http.HandlerFunc(handlers.ListFilesHandler)))
 
 	// New routes for authentication -- redirects should be handled on the client side of things
 	http.HandleFunc("/signin", handlers.Signin)

@@ -19,16 +19,16 @@ var users = map[string]string{
 }
 
 // this map stores the users sessions. For larger scale applications, you can use a database or cache for this purpose
-var sessions = map[string]session{}
+var Sessions = map[string]Session{}
 
 // each session contains the username of the user and the time at which it expires
-type session struct {
-	username string
+type Session struct {
+	Username string
 	expiry   time.Time
 }
 
 // we'll use this method later to determine if the session has expired
-func (s session) isExpired() bool {
+func (s Session) IsExpired() bool {
 	return s.expiry.Before(time.Now())
 }
 
@@ -64,8 +64,8 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	expiresAt := time.Now().Add(120 * time.Second)
 
 	// Set the token in the session map, along with the user whom it represents
-	sessions[sessionToken] = session{
-		username: creds.Username,
+	Sessions[sessionToken] = Session{
+		Username: creds.Username,
 		expiry:   expiresAt,
 	}
 
@@ -94,19 +94,19 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 	sessionToken := c.Value
 
 	// We then get the name of the user from our session map, where we set the session token
-	userSession, exists := sessions[sessionToken]
+	userSession, exists := Sessions[sessionToken]
 	if !exists {
 		// If the session token is not present in session map, return an unauthorized error
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	if userSession.isExpired() {
-		delete(sessions, sessionToken)
+	if userSession.IsExpired() {
+		delete(Sessions, sessionToken)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	// Finally, return the welcome message to the user
-	w.Write([]byte(fmt.Sprintf("Welcome %s!", userSession.username)))
+	w.Write([]byte(fmt.Sprintf("Welcome %s!", userSession.Username)))
 }
 
 func Refresh(w http.ResponseWriter, r *http.Request) {
@@ -122,13 +122,13 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 	sessionToken := c.Value
 
-	userSession, exists := sessions[sessionToken]
+	userSession, exists := Sessions[sessionToken]
 	if !exists {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	if userSession.isExpired() {
-		delete(sessions, sessionToken)
+	if userSession.IsExpired() {
+		delete(Sessions, sessionToken)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -139,13 +139,13 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 	expiresAt := time.Now().Add(120 * time.Second)
 
 	// Set the token in the session map, along with the user whom it represents
-	sessions[newSessionToken] = session{
-		username: userSession.username,
+	Sessions[newSessionToken] = Session{
+		Username: userSession.Username,
 		expiry:   expiresAt,
 	}
 
 	// Delete the older session token
-	delete(sessions, sessionToken)
+	delete(Sessions, sessionToken)
 
 	// Set the new token as the users `session_token` cookie
 	http.SetCookie(w, &http.Cookie{
@@ -170,7 +170,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	sessionToken := c.Value
 
 	// remove the users session from the session map
-	delete(sessions, sessionToken)
+	delete(Sessions, sessionToken)
 
 	// We need to let the client know that the cookie is expired
 	// In the response, we set the session token to an empty
@@ -180,4 +180,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Value:   "",
 		Expires: time.Now(),
 	})
+}
+
+// AuthenticateUser authenticates the user based on the provided credentials.
+func AuthenticateUser(username, password string) bool {
+	// Retrieve the expected password from the map
+	expectedPassword, ok := users[username]
+
+	// Check if the username exists and the password matches
+	return ok && expectedPassword == password
 }
