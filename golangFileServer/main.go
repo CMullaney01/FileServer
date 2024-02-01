@@ -24,6 +24,7 @@ func main() {
 	http.Handle("/welcome",  middleware.CORSHandler(http.HandlerFunc(handlers.Welcome)))
 	http.Handle("/refresh",  middleware.CORSHandler(http.HandlerFunc(handlers.Refresh)))
 	http.Handle("/logout",  middleware.CORSHandler(http.HandlerFunc(handlers.Logout)))
+	http.Handle("/authstatus",  middleware.CORSHandler(http.HandlerFunc(handlers.AuthStatus)))
 
 
 	s := &http.Server{

@@ -13,12 +13,13 @@ const FileList = () => {
           withCredentials: true,
         });
     
-        if (response.ok) {
+        if (response.status == 200) {
           // Assuming the response is an array of file names
           setFiles(response.data);
         } else if (response.status === 401) {
           console.error('Unauthorized access. Redirecting to login...');
           // Redirect to login or handle unauthorized access
+          window.location.href = '/login';
         } else {
           // Handle other error cases
           console.error('Error fetching files:', response.statusText);

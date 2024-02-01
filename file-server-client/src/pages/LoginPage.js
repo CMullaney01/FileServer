@@ -16,9 +16,9 @@ const LoginPage = () => {
       },{
         //AxiosRequestConfig parameter
         withCredentials: true //correct
-      });     
+      });
 
-      // Redirect to the home page or any other desired page
+    // Redirect to the home page or any other desired page
       window.location.href = '/';
     } catch (error) {
       console.error('Error logging in:', error);

@@ -10,7 +10,32 @@ import (
 	"os"
 )
 
+func AuthStatus(w http.ResponseWriter, r *http.Request) {
+	// Retrieve session token from the request
+    c, err := r.Cookie("session_token")
+    if err != nil {
+        // No session token found, user is not authenticated
+        w.WriteHeader(http.StatusUnauthorized)
+        return
+    }
 
+	sessionToken := c.Value
+	// Check if the session token is valid
+	isAuthenticated := true
+
+	userSession, exists := Sessions[sessionToken]  // Update this line to use the correct variable name
+	if !exists || userSession.IsExpired() {
+		isAuthenticated = false
+	}
+
+    if isAuthenticated {
+        // User is authenticated
+        w.WriteHeader(http.StatusOK)
+    } else {
+        // User is not authenticated
+        w.WriteHeader(http.StatusUnauthorized)
+    }
+}
 
 // ListFilesHandler handles the listing of files.
 func ListFilesHandler(w http.ResponseWriter, r *http.Request) {

@@ -37,12 +37,7 @@ func AuthCORSHandler(h http.Handler) http.Handler {
 			return
 		}
 		log.Printf("Middleware3")
-		// Continue to authentication
-		if !handlers.AuthenticateUser(userSession.Username, "") {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		log.Printf("Middleware4")
+		
 		// Set CORS headers
 		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
