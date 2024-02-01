@@ -1,0 +1,60 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const LoginPage = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Make a POST request to the /signin endpoint
+      const response = await axios.post('http://localhost:8080/signin', {
+        username,
+        password,
+      });
+
+      // Assuming the server returns a token upon successful login
+      const token = response.data.token;
+
+      // Store the token in local storage or a secure storage mechanism
+      localStorage.setItem('token', token);
+
+      // Redirect to the home page or any other desired page
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error logging in:', error);
+      // Handle login error, e.g., show an error message to the user
+    }
+  };
+
+  return (
+    <div>
+      <h2>Login Page</h2>
+      <form onSubmit={handleLogin}>
+        <div>
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+};
+
+export default LoginPage;
