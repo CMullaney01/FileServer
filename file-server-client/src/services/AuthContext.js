@@ -21,13 +21,11 @@ const AuthProvider = ({ children }) => {
         } else {
           // User is not authenticated
           console.log('User is not authenticated');
-          // Redirect to login page
           navigate('/login');
         }
       } catch (error) {
         // An error occurred (e.g., network error, server error)
         console.error('Error checking authentication status:', error);
-        // Redirect to login page in case of an error
         navigate('/login');
       }
     };

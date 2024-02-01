@@ -15,14 +15,14 @@ const LoginPage = () => {
         password,
       },{
         //AxiosRequestConfig parameter
-        withCredentials: true //correct
+        withCredentials: true 
       });
 
-    // Redirect to the home page or any other desired page
+    // Redirect to the home page 
       window.location.href = '/';
     } catch (error) {
       console.error('Error logging in:', error);
-      // Handle login error, e.g., show an error message to the user
+      
     }
   };
 
