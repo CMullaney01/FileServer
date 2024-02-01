@@ -14,6 +14,7 @@ import (
 
 // ListFilesHandler handles the listing of files.
 func ListFilesHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("List Files Called")
 	files, err := ioutil.ReadDir("./upload")
 	if err != nil {
 		http.Error(w, "Error reading directory: "+err.Error(), http.StatusInternalServerError)

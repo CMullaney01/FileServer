@@ -4,15 +4,13 @@ import FileList from '../components/FileList';
 
 function HomePage() {
   return (
-    <div>
-      Home Page
-      <FileList />
-    </div>
+    <AuthProvider>
+        <div>
+            Home Page
+            <FileList />
+        </div>
+    </AuthProvider>
   );
 }
 
-export default () => (
-  <AuthProvider>
-    <HomePage />
-  </AuthProvider>
-);
+export default HomePage

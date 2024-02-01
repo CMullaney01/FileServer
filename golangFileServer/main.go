@@ -20,10 +20,10 @@ func main() {
 	http.Handle("/list", middleware.AuthCORSHandler(http.HandlerFunc(handlers.ListFilesHandler)))
 
 	// New routes for authentication -- redirects should be handled on the client side of things
-	http.HandleFunc("/signin", handlers.Signin)
-	http.HandleFunc("/welcome", handlers.Welcome)
-	http.HandleFunc("/refresh", handlers.Refresh)
-	http.HandleFunc("/logout", handlers.Logout)
+	http.Handle("/signin", middleware.CORSHandler(http.HandlerFunc(handlers.Signin)))
+	http.Handle("/welcome",  middleware.CORSHandler(http.HandlerFunc(handlers.Welcome)))
+	http.Handle("/refresh",  middleware.CORSHandler(http.HandlerFunc(handlers.Refresh)))
+	http.Handle("/logout",  middleware.CORSHandler(http.HandlerFunc(handlers.Logout)))
 
 
 	s := &http.Server{

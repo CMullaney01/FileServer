@@ -10,17 +10,15 @@ const FileList = () => {
       try {
         // Use relative URL for both HTTP and HTTPS
         const response = await axios.get("http://localhost:8080/list", {
-          withCredentials: true, // Include credentials (cookies)
+          withCredentials: true,
         });
-
+    
         if (response.ok) {
           // Assuming the response is an array of file names
           setFiles(response.data);
         } else if (response.status === 401) {
-          // Handle unauthorized access (e.g., redirect to login)
           console.error('Unauthorized access. Redirecting to login...');
-          // Redirect logic goes here, for example using React Router
-          // history.push('/login');
+          // Redirect to login or handle unauthorized access
         } else {
           // Handle other error cases
           console.error('Error fetching files:', response.statusText);

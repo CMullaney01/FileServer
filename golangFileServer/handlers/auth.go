@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"log"
 
 	"github.com/google/uuid"
 )
@@ -47,7 +48,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	// Get the expected password from our in memory map
 	expectedPassword, ok := users[creds.Username]
 
@@ -58,7 +58,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-
 	// Create a new random session token
 	sessionToken := uuid.NewString()
 	expiresAt := time.Now().Add(120 * time.Second)
@@ -71,11 +70,18 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 
 	// Finally, we set the client cookie for "session_token" as the session token we just generated
 	// we also set an expiry time of 120 seconds
-	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   sessionToken,
-		Expires: expiresAt,
-	})
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    sessionToken,
+		Expires:  expiresAt,
+		HttpOnly: true,
+	}
+
+	// Set the cookie in the response
+	http.SetCookie(w, cookie)
+
+	log.Printf("Cookie set successfully")
+
 }
 
 func Welcome(w http.ResponseWriter, r *http.Request) {

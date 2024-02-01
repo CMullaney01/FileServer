@@ -13,13 +13,10 @@ const LoginPage = () => {
       const response = await axios.post('http://localhost:8080/signin', {
         username,
         password,
-      });
-
-      // Assuming the server returns a token upon successful login
-      const token = response.data.token;
-
-      // Store the token in local storage or a secure storage mechanism
-      localStorage.setItem('token', token);
+      },{
+        //AxiosRequestConfig parameter
+        withCredentials: true //correct
+      });     
 
       // Redirect to the home page or any other desired page
       window.location.href = '/';
