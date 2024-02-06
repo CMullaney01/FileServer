@@ -13,7 +13,7 @@ const FileList = () => {
           withCredentials: true,
         });
     
-        if (response.status == 200) {
+        if (response.status === 200) {
           // Assuming the response is an array of file names
           setFiles(response.data);
         } else if (response.status === 401) {
